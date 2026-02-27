@@ -59,3 +59,12 @@ This file is the main entry point for all instruction markdown files. Each actio
 - One script per action.
 - Keep filenames kebab-case in `instructions/` and snake_case in `scripts/`.
 - Scripts should accept CLI flags for required inputs and print a machine-readable result.
+
+## Jira Story Update Rules (Session)
+
+- Always review the target story content first before updating; do not assume missing context.
+- If user asks for formatting/style only, do not change business content.
+- Use `INV-3187` as the style reference for section titles and acceptance-criteria presentation.
+- Preserve line breaks and newline pattern from the existing story wherever possible.
+- For acceptance criteria updates, add a dedicated `Acceptance Criteria` section in checklist/task-list style.
+- Keep existing description text intact unless user explicitly requests content edits.
