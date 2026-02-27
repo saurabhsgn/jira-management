@@ -1,0 +1,19 @@
+{
+  "github": {
+    "owner": "REPLACE_ME",
+    "auth_order": ["ssh", "https_basic"],
+    "ssh": {
+      "host": "github.com",
+      "user": "git",
+      "private_key_path": "",
+      "fallback_failures": 5
+    },
+    "https_basic": {
+      "username": "REPLACE_ME",
+      "token_env": "GITHUB_TOKEN"
+    },
+    "defaults": {
+      "branch": "main"
+    }
+  }
+}

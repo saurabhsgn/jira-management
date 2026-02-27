@@ -1,4 +1,4 @@
-# JIRA/Confluence Instruction Index
+# JIRA/Confluence/GitHub Actions Instruction Index
 
 This file is the main entry point for all instruction markdown files. Each action has a dedicated instruction file and a matching script that executes the action.
 
@@ -47,6 +47,17 @@ This file is the main entry point for all instruction markdown files. Each actio
 | Move Confluence page | instructions/move-confluence-page.md | scripts/move_confluence_page.py |
 | Export Confluence page | instructions/export-confluence-page.md | scripts/export_confluence_page.py |
 
+## GitHub Actions Module
+
+- Sub-index: `instructions/github-actions/INSTRUCTIONS.md`
+- Scripts folder: `scripts/github_actions/`
+
+| Action | Instruction | Script |
+| --- | --- | --- |
+| List GitHub workflows | instructions/github-actions/list-workflows.md | scripts/github_actions/list_workflows.py |
+| Get GitHub workflow runs | instructions/github-actions/get-workflow-runs.md | scripts/github_actions/get_workflow_runs.py |
+| Resolve GitHub connectivity | instructions/github-actions/resolve-connectivity.md | scripts/github_actions/resolve_connectivity.py |
+
 ## Add a new action
 
 1) Copy `instructions/_template.md` to a new file in `instructions/`.
@@ -63,8 +74,49 @@ This file is the main entry point for all instruction markdown files. Each actio
 ## Jira Story Update Rules (Session)
 
 - Always review the target story content first before updating; do not assume missing context.
+- No update/write/change/modify/delete action should be performed without prior review and user confirmation.
+- Always retain pre-change history/snapshots before any change so full rollback to previous state is possible.
+- Retention period for rollback history is infinite unless explicitly requested otherwise.
 - If user asks for formatting/style only, do not change business content.
 - Use `INV-3187` as the style reference for section titles and acceptance-criteria presentation.
 - Preserve line breaks and newline pattern from the existing story wherever possible.
 - For acceptance criteria updates, add a dedicated `Acceptance Criteria` section in checklist/task-list style.
 - Keep existing description text intact unless user explicitly requests content edits.
+
+## GitHub Operations & Jira Comment Policy
+
+- Always map work to a Jira issue key before any GitHub operation (`clone`, `pull`, `commit`, `push`, `merge`).
+- Always provide a pre-change work summary for review before any Jira comment update.
+- Never post/update Jira comments until user explicitly approves the prepared summary.
+- Commit message format must include Jira key: `<type>(<scope>): <summary> [<JIRA-KEY>]`.
+- Commit body should include: what changed, why changed, validation/tests, and rollback note.
+- Keep commits scoped to one story/task; avoid unrelated file changes in the same commit.
+- Push only after local review summary is prepared and validated.
+- Merge only after review + validations are complete and acceptance criteria mapping is clear.
+- After push/merge, Jira comment must include completed work, files/modules impacted, test evidence, pending items/blockers, and PR/commit links.
+
+### Jira Comment Template (Review Draft First)
+
+```text
+Jira: <JIRA-KEY>
+Branch/PR: <branch-name> | <pr-link-or-na>
+Commit(s): <commit-sha-list>
+
+Work Completed
+- <item-1>
+- <item-2>
+
+Files/Modules Updated
+- <path-or-module-1>
+- <path-or-module-2>
+
+Validation / Testing
+- <test-or-check-1>
+- <test-or-check-2>
+
+Pending / Follow-up
+- <pending-item-or-none>
+
+Risks / Notes
+- <risk-note-or-none>
+```

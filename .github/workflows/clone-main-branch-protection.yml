@@ -1,0 +1,122 @@
+name: Clone Main Branch Protection
+
+on:
+  workflow_dispatch:
+    inputs:
+      repos:
+        description: "Comma-separated target repo names (for example: repo-a,repo-b)"
+        required: true
+        type: string
+      from_clone_repo_name:
+        description: "Source repo name to clone branch protection from"
+        required: false
+        default: "mai"
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  clone-main-branch-protection:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Apply main branch protection to target repos
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GH_ADMIN_TOKEN || github.token }}
+          script: |
+            const owner = context.repo.owner;
+            const sourceRepo = core.getInput('from_clone_repo_name') || 'mai';
+            const rawRepos = core.getInput('repos') || '';
+            const targetRepos = rawRepos
+              .split(',')
+              .map(s => s.trim())
+              .filter(Boolean);
+
+            if (targetRepos.length === 0) {
+              core.setFailed('No target repos were provided.');
+              return;
+            }
+
+            const boolEnabled = (obj, fallback = false) => {
+              if (obj === null || obj === undefined) return fallback;
+              if (typeof obj === 'boolean') return obj;
+              if (typeof obj === 'object' && 'enabled' in obj) return Boolean(obj.enabled);
+              return fallback;
+            };
+
+            core.info(`Loading main branch protection from ${owner}/${sourceRepo}`);
+
+            let protection;
+            try {
+              const res = await github.request('GET /repos/{owner}/{repo}/branches/{branch}/protection', {
+                owner,
+                repo: sourceRepo,
+                branch: 'main',
+                headers: { accept: 'application/vnd.github+json' },
+              });
+              protection = res.data;
+            } catch (err) {
+              core.setFailed(`Unable to load protection from ${owner}/${sourceRepo}: ${err.message}`);
+              return;
+            }
+
+            const protectionPayload = {
+              required_status_checks: protection.required_status_checks
+                ? {
+                    strict: Boolean(protection.required_status_checks.strict),
+                    contexts: protection.required_status_checks.contexts || [],
+                    checks: protection.required_status_checks.checks || [],
+                  }
+                : null,
+              enforce_admins: boolEnabled(protection.enforce_admins, false),
+              required_pull_request_reviews: protection.required_pull_request_reviews
+                ? {
+                    dismissal_restrictions: protection.required_pull_request_reviews.dismissal_restrictions || {},
+                    dismiss_stale_reviews: Boolean(protection.required_pull_request_reviews.dismiss_stale_reviews),
+                    require_code_owner_reviews: Boolean(protection.required_pull_request_reviews.require_code_owner_reviews),
+                    required_approving_review_count: protection.required_pull_request_reviews.required_approving_review_count || 0,
+                    require_last_push_approval: Boolean(protection.required_pull_request_reviews.require_last_push_approval),
+                    bypass_pull_request_allowances: protection.required_pull_request_reviews.bypass_pull_request_allowances || {},
+                  }
+                : null,
+              restrictions: protection.restrictions
+                ? {
+                    users: (protection.restrictions.users || []).map(u => u.login),
+                    teams: (protection.restrictions.teams || []).map(t => t.slug),
+                    apps: (protection.restrictions.apps || []).map(a => a.slug),
+                  }
+                : null,
+              required_linear_history: boolEnabled(protection.required_linear_history, false),
+              allow_force_pushes: boolEnabled(protection.allow_force_pushes, false),
+              allow_deletions: boolEnabled(protection.allow_deletions, false),
+              block_creations: boolEnabled(protection.block_creations, false),
+              required_conversation_resolution: boolEnabled(protection.required_conversation_resolution, false),
+              lock_branch: boolEnabled(protection.lock_branch, false),
+              allow_fork_syncing: boolEnabled(protection.allow_fork_syncing, false),
+            };
+
+            core.info(`Applying protection to ${targetRepos.length} repo(s): ${targetRepos.join(', ')}`);
+
+            const failures = [];
+            for (const entry of targetRepos) {
+              const repo = entry.includes('/') ? entry.split('/')[1] : entry;
+              const repoOwner = entry.includes('/') ? entry.split('/')[0] : owner;
+
+              try {
+                await github.request('PUT /repos/{owner}/{repo}/branches/{branch}/protection', {
+                  owner: repoOwner,
+                  repo,
+                  branch: 'main',
+                  headers: { accept: 'application/vnd.github+json' },
+                  ...protectionPayload,
+                });
+                core.info(`Updated branch protection: ${repoOwner}/${repo}`);
+              } catch (err) {
+                failures.push(`${repoOwner}/${repo}: ${err.message}`);
+              }
+            }
+
+            if (failures.length > 0) {
+              core.setFailed(`Failed repos:\n- ${failures.join('\n- ')}`);
+            }
