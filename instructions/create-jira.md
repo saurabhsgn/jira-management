@@ -17,9 +17,12 @@ Create a new JIRA issue from structured inputs.
 ## Steps
 
 1) Validate required fields and sanitize text.
-2) Build the JIRA payload with optional fields.
-3) Create the issue via JIRA API.
-4) Return issue key and URL.
+2) Ask interactive questions for each required section from `templates/jira-story-template.md`.
+3) Use provided reference pages (Confluence/Jira/docs) to prefill only confirmed details.
+4) If any section remains incomplete, ask follow-up questions; do not assume.
+5) Build the JIRA payload with optional fields.
+6) Create the issue via JIRA API only after user confirmation.
+7) Return issue key and URL.
 
 ## Script
 
