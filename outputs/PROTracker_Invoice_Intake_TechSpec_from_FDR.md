@@ -1,0 +1,92 @@
+# Technical Specification Draft v1
+
+## 1. Context
+- Project Name: PROTracker
+- Jira Project Key: TER
+- Source Requirement: confluence:3483730061
+- Prepared On: 2026-03-01 05:30 UTC
+
+## 2. Functional Requirement Summary
+Protracker Invoice Intake Functional Spec
+
+  Invoice Intake &ndash; Functional Specification    Module:  PROTracker &ndash; Invoice Integration from Invoice Domain   Version:  1.0   Date:  2026-02-17   Status:  Pending Approval from PDO and Business     Document Control       Version    Date    Author    Description    Approver      1.0    2026-02-17       Initial Draft         SignOffs           Role/Group    Name    Signature/Date      Product Owner    Madison Prosperi  Jason Stillway    Madison Prosperi/2-20-2026 (Approved)   Jason Stillway/2-20-2026  (Approved)       Architecture    Anusha Matti / Xavier Arputharaj    &nbsp;      QA/Testing Lead    &nbsp;Sanoob Umer    &nbsp;      Business Operations    Charles Farnham    &nbsp;Charles Farnham/2-20-2026(Approved)      Stakeholders &amp; Scope      Role    Responsibility      Product Owner    Approves scope and priorities      Business/Operations    Defines delivery expectations and UI indicators      Architecture    Ensures integration patterns and contracts align      Engineering    Implements ingestion, logic, and UI changes      QA    Validates functional/regression coverage       Table of Contents     Overview    Data Integration from Invoice Domain    Intake Logic    Status Transition &amp; Gatekeeping    Validation Rules    Questions / Open Items      1. Overview   PROTracker consumes  Invoice Domain Events  published by  TAMS  through  Google Cloud Pub/Sub .  The system applies structured intake validation and enrichment logic, manages invoice lifecycle status transitions.  This document defines the Functional Requirement and system responsibilities.  1.2 Scope  1.2.3 Include:  Invoice ingestion, supported types, status transitions, void handling, UI indicators, validations.  1.2.4 Exclude:  Contract changes to the Invoice Domain; future enhancements (weight/dimensions/hazmat, 3D cubing/capacity).   2. Data Integration from Invoice Domain    2.1 Source System     TAMS, Invoice Domain - Invoices consumed via Pub/Sub for Protracker.     2.2 Flow     Contract order reaches TAMS &rarr; AutoInvoice/print when inventory available (~70%).   Invoice Domain Contract      TAMS sends invoice info to Invoice Domain once Auto Invoice is triggered &rarr;  PROTracker Invoice feed consumes the.  event.    Any voided invoice updates to invoices will be further sent to Invoice Domain &rarr; ProTracker invoice feed even t.      2.3 Invoice Contract   Each invoice integrated into PROTracker must contain the required fields as defined in the existing contract.    No changes to the existing contract    Reference:  Invoice Domain Contract  (External Documentation)   Invoice Domain Contract          3. Functional Requirements &ndash; Invoice Types &amp; Intake Logic    FR‑1 Standard Invoices   FR‑1.1 The system shall support Standard Invoices where store inventory is available and ready to pick.  FR‑1.2 The system shall not introduce any changes to the existing Standard Invoice process.  FR‑1.3 Standard Invoices shall continue to follow the current lifecycle flow without modification.    FR‑2 NXP (Non‑Exchange Parts) Invoices   FR‑2.1 The system shall support NXP invoices created when no inventory is available in the store.  FR‑2.2 NXP invoices shall remain visible in PROTracker until inventory replenishment occurs.   Current Integration Behavior (Documented State)   FR‑2.3 The system shall recognize that AutoInvoice is not triggered in TAMS when inventory is unavailable.  FR‑2.4 The system shall acknowledge that store-initiated Purchase Orders (PO) are sent to the Distribution Center (DC).  FR‑2.5 The system currently does not consume DC PUSH notifications sent to NXP.   Updated Logic Requirements   FR‑2.6 The system shall remove automatic hold behavior for NXP-based invoices.  FR‑2.7 The system shall allow manual holds on NXP invoices without modification to existing functionality.  FR‑2.8 The system shall require dispatchers to manually mark NXP invoices as &ldquo;Ready&rdquo; once part
+
+## 3. Discovery Evidence
+### 3.1 Confluence Findings
+- Page 3483730061 [DM1]: Protracker Invoice Intake Functional Spec
+
+### 3.2 Jira Findings
+- None: None | None | None
+- None: None | None | None
+- None: None | None | None
+- None: None | None | None
+- None: None | None | None
+- None: None | None | None
+- None: None | None | None
+- None: None | None | None
+- None: None | None | None
+- None: None | None | None
+
+### 3.3 Codebase Findings
+- Total files scanned: 101
+- Code files scanned: 49
+
+## 4. Existing Functionality Mapping
+### 4.1 Frontend
+- None
+
+### 4.2 Backend
+- main.py
+- scripts\add_confluence_attachment.py
+- scripts\add_confluence_comment.py
+- scripts\add_jira_attachment.py
+- scripts\add_jira_labels.py
+- scripts\add_jira_watcher.py
+- scripts\add_jira_worklog.py
+- scripts\assign_jira_issue.py
+- scripts\create_acceptance_criteria_from_confluence.py
+- scripts\create_acceptance_criteria_from_jira.py
+- scripts\create_confluence_page.py
+- scripts\create_jira.py
+- scripts\create_jira_from_confluence.py
+- scripts\create_jira_subtask.py
+- scripts\create_tech_spec_from_fdr.py
+- scripts\create_test_cases_from_jira.py
+- scripts\delete_confluence_page.py
+- scripts\delete_jira_issue.py
+- scripts\discover_existing_functionality.py
+- scripts\explain_jira.py
+- scripts\export_confluence_page.py
+- scripts\get_jira_changelog.py
+- scripts\link_jira_issues.py
+- scripts\move_confluence_page.py
+- scripts\pull_jira.py
+
+### 4.3 UI/UX
+- None
+
+### 4.4 Mobile
+- None
+
+## 5. Proposed Technical Design
+Draft generated from FDR topics and discovered context. Confirm open questions before ticket creation.
+
+## 6. Story-Level Breakdown (Draft)
+- [Story] Protracker Invoice Intake Functional Spec
+  - Draft ID: S01
+  - Description: Derived from FDR topic: Protracker Invoice Intake Functional Spec
+- [Story] Invoice Intake &ndash; Functional Specification    Module:  PROTracker &ndash; Invoice Integration from Invoice Domai...
+  - Draft ID: S02
+  - Description: Derived from FDR topic: Invoice Intake &ndash; Functional Specification    Module:  PROTracker &ndash; Invoice Integration from Invoice Domain   Version:  1.0   Date:  2026-02-17   Status:  Pending Approval from PDO and Business     Document Control       Version    Date    Author    Description    Approver      1.0    2026-02-17       Initial Draft         SignOffs           Role/Group    Name    Signature/Date      Product Owner    Madison Prosperi  Jason Stillway    Madison Prosperi/2-20-2026 (Approved)   Jason Stillway/2-20-2026  (Approved)       Architecture    Anusha Matti / Xavier Arputharaj    &nbsp;      QA/Testing Lead    &nbsp;Sanoob Umer    &nbsp;      Business Operations    Charles Farnham    &nbsp;Charles Farnham/2-20-2026(Approved)      Stakeholders &amp; Scope      Role    Responsibility      Product Owner    Approves scope and priorities      Business/Operations    Defines delivery expectations and UI indicators      Architecture    Ensures integration patterns and contracts align      Engineering    Implements ingestion, logic, and UI changes      QA    Validates functional/regression coverage       Table of Contents     Overview    Data Integration from Invoice Domain    Intake Logic    Status Transition &amp; Gatekeeping    Validation Rules    Questions / Open Items      1. Overview   PROTracker consumes  Invoice Domain Events  published by  TAMS  through  Google Cloud Pub/Sub .  The system applies structured intake validation and enrichment logic, manages invoice lifecycle status transitions.  This document defines the Functional Requirement and system responsibilities.  1.2 Scope  1.2.3 Include:  Invoice ingestion, supported types, status transitions, void handling, UI indicators, validations.  1.2.4 Exclude:  Contract changes to the Invoice Domain; future enhancements (weight/dimensions/hazmat, 3D cubing/capacity).   2. Data Integration from Invoice Domain    2.1 Source System     TAMS, Invoice Domain - Invoices consumed via Pub/Sub for Protracker.     2.2 Flow     Contract order reaches TAMS &rarr; AutoInvoice/print when inventory available (~70%).   Invoice Domain Contract      TAMS sends invoice info to Invoice Domain once Auto Invoice is triggered &rarr;  PROTracker Invoice feed consumes the.  event.    Any voided invoice updates to invoices will be further sent to Invoice Domain &rarr; ProTracker invoice feed even t.      2.3 Invoice Contract   Each invoice integrated into PROTracker must contain the required fields as defined in the existing contract.    No changes to the existing contract    Reference:  Invoice Domain Contract  (External Documentation)   Invoice Domain Contract          3. Functional Requirements &ndash; Invoice Types &amp; Intake Logic    FR‑1 Standard Invoices   FR‑1.1 The system shall support Standard Invoices where store inventory is available and ready to pick.  FR‑1.2 The system shall not introduce any changes to the existing Standard Invoice process.  FR‑1.3 Standard Invoices shall continue to follow the current lifecycle flow without modification.    FR‑2 NXP (Non‑Exchange Parts) Invoices   FR‑2.1 The system shall support NXP invoices created when no inventory is available in the store.  FR‑2.2 NXP invoices shall remain visible in PROTracker until inventory replenishment occurs.   Current Integration Behavior (Documented State)   FR‑2.3 The system shall recognize that AutoInvoice is not triggered in TAMS when inventory is unavailable.  FR‑2.4 The system shall acknowledge that store-initiated Purchase Orders (PO) are sent to the Distribution Center (DC).  FR‑2.5 The system currently does not consume DC PUSH notifications sent to NXP.   Updated Logic Requirements   FR‑2.6 The system shall remove automatic hold behavior for NXP-based invoices.  FR‑2.7 The system shall allow manual holds on NXP invoices without modification to existing functionality.  FR‑2.8 The system shall require dispatchers to manually mark NXP invoices as &ldquo;Ready&rdquo; once parts are received and picked.   Future / Technical Considerations   FR‑2.9 The system should evaluate the ability to subscribe to and consume NXP replenishment events.  FR‑2.10 The system should support automatic transition of NXP invoices to &ldquo;Invoiced&rdquo; status upon confirmed replenishment (subject to technical feasibility and approval).   FR‑3 EJOEI (Electronic Job Order Invoice)   FR‑3.1 The system shall support EJOEI invoices.  FR‑3.2 The system shall not modify the existing EJOEI process flow.  FR‑3.3 EJOEI invoices shall follow the same flow as Standard inventory-ready invoices.  FR‑3.4 EJOEI invoices shall not be automatically placed on Hold unless manually triggered.   FR‑4 InterStore Orders    ⚠️  Business confirmation required. Scope subject to approval.   FR‑4A InterStore Orders via NXP   FR‑4.1 The system shall identify InterStore orders created via NXP when no inventory exists in the store.  FR‑4.2 The system shall recognize that AutoInvoice is not triggered in TAMS under no-inventory conditions.  FR‑4.3 Upon receiving a &ldquo;MarkForDelivery&rdquo; event, the system shall:**    Validate PurchaseOrder#    Validate LineItemType     FR‑4B InterStore Orders via TAMS   FR‑4.6 The system shall identify InterStore orders created directly via TAMS when inventory is unavailable.  FR‑4.7 The system shall recognize that AutoInvoice is not triggered under no-inventory conditions.  FR‑4.8 Upon receiving a &ldquo;MarkForDelivery&rdquo; event, the system shall:**    Validate PurchaseOrder#    Validate LineItemType     FR‑5 Excluded Invoice Types   FR‑5.1 The system shall exclude the following invoice types from processing under this module:    ROA (Return of Asset)    CRD (Credit)    FR‑5.2 The system shall maintain current functionality for excluded invoice types without introducing new processing logic.   4. Status Transition &amp; Gatekeeping    4.1 State Machine   The system manages invoice readiness using the following states:       State      Description      Trigger / Action        Invoiced      Invoice integrated from Invoice Domain      Initial state        On Hold      Dispatcher  or auto hold       Based on identifiers        Ready      Eligible for Route Optimization      Dispatcher clicks &ldquo;Ready&rdquo;        Routing      Route optimization in progress      Triggered after &ldquo;Ready&rdquo;        To Track      Post-routing state      TBD &ndash; confirm if status changes after route creation        4.2 Handling Updates (Deltas)    Void / Cancellation Logic from Invoice Domain    Condition:  Check current PROTracker status      Case    Status Condition    Action       A &ndash; Active/Completed     Departed or Delivered    Ignore void. Maintain history.       B &ndash; Pending     Invoiced, Ready, or Routed (not departed)    Execute void. Remove from routing/scope. Notify mobile if route pending.       4.3 Visual Indicator &ndash; Invoice Tab   Enhance UI with visual cues based on  ETA proximity.    Order Eligibility     Applies to tiers:    Standard    No Rush    Deliver Together      Only invoices NOT marked as  Ready     No visual indicator if ETA is distant    Configurable activation threshold (e.g., within X minutes of ETA)         Time-Based Escalation         Time Remaining       Color Code      Meaning       &gt;10 minutes    Green    On track      10&ndash;5 minutes    Orange    Approaching risk      &le;5 minutes    Red    Immediate action required      Past deadline    Flashing Red    High risk of late delivery      ** Removed Icons(See business approved UX above)     Green  &ndash; Safe / On track     Orange  &ndash; Warning / Risk approaching     Red  &ndash; Critical / Immediate attention required      Flashing Red  &ndash; Escalated / Past SLA deadline     Clarification needed for No Rush &amp; Deliver Together behavior.    Tier-Based Color Coding   Assign distinct colors by SLA tier:      Tier    Color (TBD)      Deliver Together    TBD      No Rush    Silver / Gray      Standard    Gold / Yellow      Additional highlight effect applied when within risk threshold.   4.4 Flow Diagram      ProTracker Invoice Intake flow      5. Validation Rules   ✅ No change to current functionality   5.1 Mandatory Fields   Customer Address  Street, City, Zip  (Source: Invoice payload)  Delivery Expectation (SLA)  Provided by TAMS:    No Rush    Standard    Deliver Together     5.2 Delivery Expectation Logic       SLA Type    Action      Missing    Default to Standard      Standard    Retrieve Customer SLA from Customer Domain      Deliver Together    TBD (grouping logic required)      No Rush    TBD (e.g., End-of-Day delivery)       5.3 Future Scope   Not included in Phase 1:    Weight    Dimensions    Hazmat attributes    Planned for Phase 3:    3D Cubing    Vehicle Capacity constraints     6. Questions / Open Items     EJOEI orders currently do not include ETA.    Need confirmation of EJOEI identifier in Invoice Domain.    Ensure ETA is passed for EJOEI invoices.    Alternative option: Allow dispatchers to manually provide ETA during checkout.       7. Appendix   Original document -  InvoiceIntakeFS.docx
+
+## 7. Open Questions (Interactive)
+- No open questions captured yet.
+
+## 8. Risks and Dependencies
+- Dependencies and risks require interactive confirmation with project stakeholders.
+
+## 9. Implementation and Validation Plan
+- Review and approve draft tech spec.
+- Confirm story split and acceptance criteria.
+- Create Jira tickets only after user approval.
+

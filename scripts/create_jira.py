@@ -15,14 +15,19 @@ from _actions import run_action
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Create a new JIRA issue.")
-    parser.add_argument('--project-key', required=True)
-    parser.add_argument('--issue-type', required=True)
-    parser.add_argument('--summary', required=True)
+    parser.add_argument('--project-key', required=False)
+    parser.add_argument('--issue-type', required=False)
+    parser.add_argument('--summary', required=False)
     parser.add_argument('--description', required=False)
     parser.add_argument('--labels', required=False)
     parser.add_argument('--assignee', required=False)
     parser.add_argument('--priority', required=False)
     parser.add_argument('--components', required=False)
+    parser.add_argument(
+        '--tech-spec-file',
+        required=False,
+        help="Path to refined tech spec markdown. If provided, validates required sections before Jira creation.",
+    )
 
     return parser
 

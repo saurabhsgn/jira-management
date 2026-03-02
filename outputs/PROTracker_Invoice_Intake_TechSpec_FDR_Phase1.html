@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PROTracker Invoice Intake - Technical Specification (Phase 1)</title>
+  <style>
+    body { font-family: Segoe UI, Arial, sans-serif; line-height: 1.55; margin: 0; background: #f7f8fa; color: #1f2937; }
+    .container { max-width: 980px; margin: 32px auto; background: #fff; padding: 36px 42px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+    h1, h2, h3 { color: #0f172a; }
+    h1 { font-size: 30px; margin-top: 0; }
+    h2 { margin-top: 28px; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px; }
+    code { background: #f1f5f9; padding: 2px 5px; border-radius: 4px; }
+    pre { background: #0b1020; color: #e5e7eb; padding: 14px; border-radius: 8px; overflow-x: auto; }
+    a { color: #0b5fff; }
+    ul { padding-left: 22px; }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <h1 id="protracker-invoice-intake-technical-specification-phase-1-draft">PROTracker Invoice Intake - Technical Specification (Phase 1 Draft)</h1>
+<h2 id="1-context">1. Context</h2>
+<ul>
+<li>Project: PROTracker</li>
+<li>Jira Project Key: TER</li>
+<li>Scope: Phase 1 only</li>
+<li>Source Documents:</li>
+<li>https://gpcprod.atlassian.net/wiki/spaces/DM1/pages/3401908226/ProTracker+Invoice+Intake+flow</li>
+<li>https://gpcprod.atlassian.net/wiki/spaces/DM1/pages/3483730061/Protracker+Invoice+Intake+Functional+Spec</li>
+</ul>
+<h2 id="2-objective">2. Objective</h2>
+<p>Define technical behavior for invoice intake from Invoice Domain into PROTracker, including ingestion, validation, status gatekeeping, void handling, and invoice-tab visual indicators for dispatch readiness risk.</p>
+<h2 id="3-phase-1-scope">3. Phase 1 Scope</h2>
+<h3 id="in-scope">In Scope</h3>
+<ul>
+<li>Invoice ingestion via TAMS -&gt; Invoice Domain -&gt; Pub/Sub -&gt; PROTracker intake.</li>
+<li>Support and handling rules for:</li>
+<li>Standard invoices.</li>
+<li>NXP invoices (manual readiness behavior; no automatic NXP hold behavior in updated logic).</li>
+<li>EJOEI invoices (existing flow retained).</li>
+<li>Exclusion handling for invoice types:</li>
+<li>ROA.</li>
+<li>CRD.</li>
+<li>State transition gatekeeping:</li>
+<li>Invoiced, On Hold, Ready, Routing, To Track.</li>
+<li>Void/cancellation delta handling based on invoice status condition.</li>
+<li>Invoice tab visual escalation indicators based on ETA proximity thresholds.</li>
+<li>Mandatory field validations and delivery expectation handling.</li>
+</ul>
+<h3 id="out-of-scope-phase-1">Out of Scope (Phase 1)</h3>
+<ul>
+<li>Contract changes to Invoice Domain payload.</li>
+<li>Weight/dimensions/hazmat processing.</li>
+<li>3D cubing and vehicle capacity constraints.</li>
+<li>Story-level Jira breakdown (excluded per current request).</li>
+</ul>
+<h2 id="4-existing-functional-inputs-and-interfaces">4. Existing Functional Inputs and Interfaces</h2>
+<h2 id="41-upstream">4.1 Upstream</h2>
+<ul>
+<li>Source system: TAMS / Invoice Domain.</li>
+<li>Transport: Google Cloud Pub/Sub event feed.</li>
+<li>Trigger pattern: AutoInvoice/print when inventory is available; updates and voids continue as domain events.</li>
+</ul>
+<h2 id="42-downstream-internal">4.2 Downstream / Internal</h2>
+<ul>
+<li>PROTracker intake processor validates and enriches invoice data.</li>
+<li>Dispatch-facing workflow depends on readiness states and visual risk cues.</li>
+<li>Route optimization process starts from Ready -&gt; Routing.</li>
+</ul>
+<h2 id="5-functional-rules-phase-1">5. Functional Rules (Phase 1)</h2>
+<h2 id="51-invoice-type-rules">5.1 Invoice Type Rules</h2>
+<ul>
+<li>Standard:</li>
+<li>Keep existing behavior unchanged.</li>
+<li>NXP:</li>
+<li>Keep visible until replenishment occurs.</li>
+<li>Remove automatic hold behavior for NXP path.</li>
+<li>Allow manual hold behavior.</li>
+<li>Dispatcher manually marks Ready after parts are received/picked.</li>
+<li>EJOEI:</li>
+<li>Keep existing behavior unchanged.</li>
+<li>Follow standard inventory-ready flow.</li>
+<li>No automatic hold unless manually triggered.</li>
+<li>InterStore:</li>
+<li>Business confirmation required per source; keep as gated/open decision area.</li>
+<li>Excluded types:</li>
+<li>ROA, CRD must not receive new processing logic in this module.</li>
+</ul>
+<h2 id="52-status-transition-and-gatekeeping">5.2 Status Transition and Gatekeeping</h2>
+<ul>
+<li>Initial state: Invoiced.</li>
+<li>On Hold: Dispatcher/manual or hold logic entry point.</li>
+<li>Ready: Dispatcher marks invoice Ready for optimization eligibility.</li>
+<li>Routing: Optimization in progress.</li>
+<li>To Track: Post-routing status (source marks this as needing final confirmation behavior).</li>
+</ul>
+<h2 id="53-delta-void-handling">5.3 Delta / Void Handling</h2>
+<ul>
+<li>Case A (Departed/Delivered):</li>
+<li>Ignore incoming void; preserve history.</li>
+<li>Case B (Invoiced/Ready/Routed but not departed):</li>
+<li>Execute void behavior.</li>
+<li>Remove from routing scope.</li>
+<li>Notify mobile route context when applicable.</li>
+</ul>
+<h2 id="54-validation-and-delivery-expectation">5.4 Validation and Delivery Expectation</h2>
+<ul>
+<li>Mandatory fields:</li>
+<li>Customer address fields: Street, City, Zip.</li>
+<li>Delivery expectation (SLA) fields from source.</li>
+<li>SLA handling:</li>
+<li>Missing SLA -&gt; default Standard.</li>
+<li>Standard -&gt; retrieve customer SLA from Customer Domain.</li>
+<li>Deliver Together / No Rush -&gt; explicitly marked TBD in source and retained as open item.</li>
+</ul>
+<h2 id="55-uiux-risk-indicator-behavior">5.5 UI/UX Risk Indicator Behavior</h2>
+<ul>
+<li>Applies to non-Ready invoices for targeted tiers.</li>
+<li>Time-based escalation:</li>
+<li>
+<blockquote>
+<p>10 min: Green.</p>
+</blockquote>
+</li>
+<li>10-5 min: Orange.</li>
+<li>&lt;=5 min: Red.</li>
+<li>Past deadline: Flashing Red.</li>
+<li>Notes in source indicate icon behavior adjustments and business-approved UX references.</li>
+</ul>
+<h2 id="6-technical-design-phase-1">6. Technical Design (Phase 1)</h2>
+<h2 id="61-intake-processing-pipeline">6.1 Intake Processing Pipeline</h2>
+<ol>
+<li>Consume invoice events from Pub/Sub.</li>
+<li>Validate mandatory payload fields and invoice-type eligibility.</li>
+<li>Apply invoice-type rules.</li>
+<li>Persist/refresh invoice state in PROTracker.</li>
+<li>Apply gatekeeping transitions.</li>
+<li>Surface invoice UI indicators based on ETA proximity and tier eligibility.</li>
+<li>Process deltas (void/cancellation updates) via conditional rules.</li>
+</ol>
+<h2 id="62-data-and-state-responsibilities">6.2 Data and State Responsibilities</h2>
+<ul>
+<li>Persist current invoice lifecycle state for decisioning.</li>
+<li>Maintain immutable/auditable behavior for ignored-void scenarios (departed/delivered).</li>
+<li>Ensure routing eligibility reflects only Ready and non-voided valid invoices.</li>
+</ul>
+<h2 id="63-non-functional-expectations">6.3 Non-Functional Expectations</h2>
+<ul>
+<li>Reliability:</li>
+<li>Event handling must be idempotent for repeated or out-of-order updates.</li>
+<li>Observability:</li>
+<li>Log intake decisions (accepted/rejected/void/ignored) with status and reason.</li>
+<li>Safety:</li>
+<li>Preserve rollback/guard controls noted in intake flow references.</li>
+</ul>
+<h2 id="7-open-items-source-carried-no-assumptions">7. Open Items (Source-Carried, No Assumptions)</h2>
+<ul>
+<li>InterStore scope and behavior final approval required.</li>
+<li>Deliver Together detailed grouping logic marked TBD.</li>
+<li>No Rush handling details marked TBD.</li>
+<li>Confirmation needed for EJOEI identifier and ETA availability path.</li>
+<li>Clarification of final status behavior after route creation (To Track transition condition).</li>
+<li>Clarification of handling when optimized routes are actioned near/outside SLA window.</li>
+</ul>
+<h2 id="8-phase-1-acceptance-targets-technical">8. Phase 1 Acceptance Targets (Technical)</h2>
+<ul>
+<li>Intake supports Standard, NXP, EJOEI as defined without breaking existing Standard/EJOEI behavior.</li>
+<li>Excluded types (ROA, CRD) remain outside processing scope.</li>
+<li>Gatekeeping states operate per defined transition triggers.</li>
+<li>Void handling follows status-conditional behavior with correct routing impact.</li>
+<li>Invoice tab risk indicators render correctly for defined thresholds and eligible cases.</li>
+<li>Mandatory field and SLA default logic are enforced.</li>
+</ul>
+<h2 id="9-references">9. References</h2>
+<ul>
+<li>ProTracker Invoice Intake flow:</li>
+<li>https://gpcprod.atlassian.net/wiki/spaces/DM1/pages/3401908226/ProTracker+Invoice+Intake+flow</li>
+<li>Protracker Invoice Intake Functional Spec:</li>
+<li>https://gpcprod.atlassian.net/wiki/spaces/DM1/pages/3483730061/Protracker+Invoice+Intake+Functional+Spec</li>
+</ul>
+  </main>
+</body>
+</html>

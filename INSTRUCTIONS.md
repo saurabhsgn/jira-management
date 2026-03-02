@@ -46,6 +46,8 @@ This file is the main entry point for all instruction markdown files. Each actio
 | Add Confluence attachment | instructions/add-confluence-attachment.md | scripts/add_confluence_attachment.py |
 | Move Confluence page | instructions/move-confluence-page.md | scripts/move_confluence_page.py |
 | Export Confluence page | instructions/export-confluence-page.md | scripts/export_confluence_page.py |
+| Discovery session | instructions/discovery-session.md | scripts/discover_existing_functionality.py |
+| Create technical specification from FDR | instructions/create-tech-spec-from-fdr.md | scripts/create_tech_spec_from_fdr.py |
 
 ## GitHub Actions Module
 
@@ -70,15 +72,19 @@ This file is the main entry point for all instruction markdown files. Each actio
 - One script per action.
 - Keep filenames kebab-case in `instructions/` and snake_case in `scripts/`.
 - Scripts should accept CLI flags for required inputs and print a machine-readable result.
+- Use `templates/jira-story-template.md` as the default Jira story structure.
 
 ## Jira Story Update Rules (Session)
 
 - Always review the target story content first before updating; do not assume missing context.
+- For new Jira creation, gather inputs interactively section-by-section using `templates/jira-story-template.md`.
+- If content for any section is missing and not found in provided reference pages, ask follow-up questions before creating/updating the Jira.
 - No update/write/change/modify/delete action should be performed without prior review and user confirmation.
 - Always retain pre-change history/snapshots before any change so full rollback to previous state is possible.
 - Retention period for rollback history is infinite unless explicitly requested otherwise.
 - If user asks for formatting/style only, do not change business content.
 - Use `INV-3187` as the style reference for section titles and acceptance-criteria presentation.
+- For generated Jira story descriptions, use bold blue section titles (target color: `#4C9AFF`).
 - Preserve line breaks and newline pattern from the existing story wherever possible.
 - For acceptance criteria updates, add a dedicated `Acceptance Criteria` section in checklist/task-list style.
 - Keep existing description text intact unless user explicitly requests content edits.

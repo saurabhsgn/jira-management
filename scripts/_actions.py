@@ -7,6 +7,7 @@ from typing import Any
 from _config import ConfigError, load_config
 from _confluence import ConfluenceClient
 from _jira import JiraClient
+from _tech_spec import parse_and_validate_refined_tech_spec
 from _utils import ensure_list, to_adf
 
 
@@ -66,6 +67,27 @@ def _jira_issue_url(jira: JiraClient, issue_key: str) -> str:
 
 def create_jira(args: dict[str, Any]) -> dict[str, Any]:
     jira, _ = _get_clients()
+    tech_spec_file = args.get("tech_spec_file")
+
+    if tech_spec_file:
+        parsed = parse_and_validate_refined_tech_spec(tech_spec_file)
+        errors = parsed.get("errors", [])
+        if errors:
+            joined = "\n- ".join(str(item) for item in errors)
+            raise ValueError(f"Tech spec validation failed:\n- {joined}")
+
+        args["project_key"] = args.get("project_key") or parsed.get("jira_project_key")
+        args["issue_type"] = args.get("issue_type") or parsed.get("story_type")
+        args["summary"] = args.get("summary") or parsed.get("story_summary")
+        args["description"] = args.get("description") or parsed.get("story_description")
+
+    if not args.get("project_key"):
+        raise ValueError("project_key is required (or must be present in --tech-spec-file).")
+    if not args.get("issue_type"):
+        raise ValueError("issue_type is required (or must be present in --tech-spec-file).")
+    if not args.get("summary"):
+        raise ValueError("summary is required (or must be present in --tech-spec-file).")
+
     fields = {
         "project": {"key": args["project_key"]},
         "issuetype": {"name": args["issue_type"]},
